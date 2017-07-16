@@ -1,0 +1,62 @@
+Install STAGING server
+===================
+
+1. Download Ubuntu 16.04.2 LTS
+  - https://www.ubuntu.com/download/server
+
+2. Hardware configuration
+  - Hardware specifications
+    - Name: STAGING_server
+    - Type: Linux
+    - Version: Ubuntu (64-bit)
+    - Memory size: 1024 MB
+    - Hard disk (file size): 40 GB
+    - Hard disk file type: VDI
+    - Storage on physical hard disk: Dynamically allocated
+    - Network:
+      - Attached to: Bridged network (use same IP scope as your home router)
+      - Name: <your NIC adapter name>
+
+3. Ubuntu server installation
+  - Language: English
+  - Select your location: United States
+  - Configure the keyboard: No; English (US); English (US);
+  - Configure the network:
+    - Hostname: staging
+
+  - Set up users and passwords
+    - Username for your account: cb
+    - Choose a password for the new user: cb
+    - Re-enter password to verify: cb
+    - NOTE: Never, never, never use weak password like this. As I know what I
+      am doing here and we making a demo which will be destroyed after course.
+      I would like if you take few minutes and check this short info about
+      how to properly set strong password http://passwordsgenerator.net/ !!!
+    - Encrypt your home directory?: No
+
+  - Configure the clock
+    - Is this time zone correct?: Yes (Setup your preferred time zone)
+
+  - Partition disks
+    - Partitioning method: Guided - use entire disk and set up LVM
+    - Select disk to partition: ENTER
+    - Write the changes to disks and configure LVM? <Yes>
+    - Amount of volume group to use for guided partitioning: 42.4 GB <Continue>
+    - Write the changes to disks?: <Yes>
+
+  - Configure the package manager
+    - HTTP proxy information (blank for none): <Continue>
+
+  - Configure taskel
+    - How do you want to manage upgrades on this system?: No automatic updates
+
+  - Software selection
+    - Choose software to install: <with SPACE select two options>
+      [*] standard system utilities
+      [*] OpenSSH server
+      - go to <Continue>
+
+  - Install the GRUB boot loader on a hard disk
+    - Install the GRUB boot loader to the master boot record?: <Yes>
+    
+  - Reboot your system: Enter

@@ -1,0 +1,215 @@
+Deploy Nginx MySQL PHP7 Supervisor
+==================================
+Create
+================================================
+- salt/nginx/init.sls
+```
+nginx:
+  pkg.installed:
+    - name: nginx
+
+nginx-extras:
+  pkg.installed:
+    - name: nginx-extras
+
+nginx.conf:
+  file.managed:
+    - name: /etc/nginx/nginx.conf
+    - source: salt://nginx/files/nginx.conf
+
+#default.conf:
+#  file.managed:
+#    - name: /etc/nginx/sites-available/default
+#    - source: salt://nginx/files/default.conf
+
+local.calcbrain.com:
+  file.managed:
+    - name: /etc/nginx/sites-available/local.calcbrain.com
+    - source: salt://nginx/files/local.calcbrain.com
+
+local.calcbrain.com-symlink:
+  file.symlink:
+    - name: /etc/nginx/sites-enabled/local.calcbrain.com
+    - target: ../sites-available/local.calcbrain.com
+
+40x.html:
+  file.managed:
+    - name: /usr/share/nginx/html/40x.html
+    - source: salt://nginx/files/40x.html
+
+{% if not salt['file.directory_exists' ]('/opt/local.calcbrain.com/public') %}
+/home/init_dir:
+  file.directory:
+    - user:  www-data
+    - name:  /opt/local.calcbrain.com/public
+    - group:  www-data
+    - mode:  755
+  {% else %}
+    cmd.run:
+      - name: echo "Directory exists"
+  {% endif %}
+```
+================================================
+- salt/nginx/files/nginx.conf
+```
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+	worker_connections 768;
+	# multi_accept on;
+}
+
+http {
+      log_format timed_combined '$remote_addr - $remote_user [$time_local] '
+      '"$request" $status $body_bytes_sent '
+      '"$http_referer" "$http_user_agent" '
+      '$request_time $upstream_response_time $pipe';
+	##
+	# Basic Settings
+	##
+
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 65;
+	types_hash_max_size 2048;
+	# server_tokens off;
+
+	# server_names_hash_bucket_size 64;
+	# server_name_in_redirect off;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	##
+	# SSL Settings
+	##
+
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
+	ssl_prefer_server_ciphers on;
+
+	##
+	# Logging Settings
+	##
+
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
+
+	##
+	# Gzip Settings
+	##
+
+	gzip on;
+	gzip_disable "msie6";
+
+	# gzip_vary on;
+	# gzip_proxied any;
+	# gzip_comp_level 6;
+	# gzip_buffers 16 8k;
+	# gzip_http_version 1.1;
+	# gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+	##
+	# Virtual Host Configs
+	##
+
+	real_ip_header X-Forwarded-For;
+ 	set_real_ip_from 0.0.0.0/0;
+
+
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+}
+
+
+#mail {
+#	# See sample authentication script at:
+#	# http://wiki.nginx.org/ImapAuthenticateWithApachePhpScript
+#
+#	# auth_http localhost/auth.php;
+#	# pop3_capabilities "TOP" "USER";
+#	# imap_capabilities "IMAP4rev1" "UIDPLUS";
+#
+#	server {
+#		listen     localhost:110;
+#		protocol   pop3;
+#		proxy      on;
+#	}
+#
+#	server {
+#		listen     localhost:143;
+#		protocol   imap;
+#		proxy      on;
+#	}
+#}
+
+```
+================================================
+- salt/nginx/files/local.calcbrain.com
+```
+server {
+	server_name www.local.calcbrain.com;
+	return 301 $scheme://local.calcbrain.com$request_uri;
+}
+server {
+	server_name local.calcbrain.com;
+	access_log /var/log/nginx/access-local.calcbrain.com.log;
+	error_log /var/log/nginx/error-local.calcbrain.com.log;
+	root /opt/local.calcbrain.com/public;
+	index index.php index.html index.htm;
+	location / {
+		try_files $uri $uri/ /index.php$is_args$args;
+	}
+	location ~ \.php$ {
+		try_files $uri /index.php =404;
+		fastcgi_split_path_info ^(.+\.php)(/.+)$;
+		fastcgi_index index.php;
+		fastcgi_param PATH_INFO	  $fastcgi_path_info;
+		fastcgi_param SCRIPT_FILENAME   $document_root$fastcgi_script_name;
+		include /etc/nginx/fastcgi_params;
+		fastcgi_pass unix:/var/run/php/php7-fpm.sock;
+	}
+}
+```
+================================================
+- salt/nginx/files/40x.html
+```
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+    <style>
+        body {
+            width: 35em;
+            margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+<h1>Page Not Found.</h1>
+<p>Sorry, the page you are looking for is currently unavailable.<br/>
+    Please try again later.</p>
+</body>
+</html>
+
+```
+================================================
+- salt/mysql/init.sls
+```
+mysql:
+pkg.installed:
+  - name: mariadb-server
+python-mysqldb:
+pkg.installed:
+  - name: python-mysqldb
+```
+================================================
+
+================================================
+
+================================================
+
+================================================

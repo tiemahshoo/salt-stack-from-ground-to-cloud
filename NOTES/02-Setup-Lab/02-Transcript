@@ -1,0 +1,85 @@
+Setup STAGING server
+===================
+
+1. Create current STAGING server snapshot
+  - NOTE: Before we continue, I strongly suggest you to create Snapshot of this
+  very momement STAGING server so you could use it as some kind of template for
+  next servers and your future testing.
+  - Create snapshot
+    - Name: BASE
+    - Description:
+        OS: Ubuntu 16.04
+        Network: dhcp
+        User: cb
+        Pass: cb
+        Tools: ssh, standard system utilities
+
+2. Setup server
+    - Start STAGING server
+    - Login:
+      - login: cb
+      - Password: cb
+    - check ip address:
+      $ ifconfig
+
+    - From local server check if we could ping STAGING server and login
+    through terminal
+      $ ping 192.168.0.32
+      $ ssh cb@192.168.0.32
+
+    - We are on STAGING now, let check ip address to be sure
+      $ ifconfig
+
+    - Setup static ip on STAGING server
+      $ sudo vim /etc/network/interfaces
+        ```
+        # The primary network interface
+        auto enp0s3
+        iface enp0s3 inet static
+        address 192.168.0.50
+        netmask 255.255.255.0
+        gateway 192.168.0.1
+
+        dns-nameservers 192.168.0.1 8.8.8.8
+        ```
+
+    - Restart enp0s3 network interface
+      $ sudo ifdown enp0s3 && sudo ifup enp0s3
+    - Let try to ping STAGING server from local machine and login
+      $ ping 192.168.0.50
+      $ ssh cb 192.168.0.50
+        - Setup no password for user cb on STAGING server
+        $  sudo visudo
+          - at the end of file add this line
+          ```
+          cb  ALL=(ALL) NOPASSWD: ALL
+          ```
+
+    - Install figlet on STAGING server and setup message of the day (MOTD)
+      $ sudo apt-get install figlet
+      - edit MOTD file header
+        $ sudo vim /etc/update-motd.d/00-header
+      - just before "Welcome ..." line add these two lines
+        ```
+        figlet $(hostname)
+        printf '\n'
+        ```
+      - logout and login, should see figlet in action
+
+    - Setup password less login from local machine to STAGING server
+      - From local machine copy content of ~/.ssh/id_rsa.pub
+        $ cat ~/.ssh/id_rsa.pub
+      - Paste it in ~/.ssh/authorized_keys on STAGING server and set up right permissions
+        $ vim ~/.ssh/authorized_keys
+          - put content from local machine and save file; append right permissions
+        $ chmod 600 ~/.ssh/authorized_keys
+      - Install common tools on STAGING server
+        $ sudo apt-get install htop vim git tmux wget unzip
+      - Setup hostname for master (salt-master) on STAGING server in /etc/hosts
+        $ sudo vim /etc/hosts
+          - add master at the end of first line so it look like
+            ```
+            127.0.0.1  localhost master
+            ```
+
+THERE IS THINGS NEED TO BE ADDED            

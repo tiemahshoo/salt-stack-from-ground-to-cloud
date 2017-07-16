@@ -1,0 +1,12 @@
+Prepare Environment
+===================
+
+1. https://www.virtualbox.org/
+
+2. Download VirtualBox platform package, Extension Pack and Software Developer Kit (SDK)
+
+3. Install VirtualBox
+
+4. Setup Preferences:
+  - General -> Default Machine Folder: <folder where you store your VM's>
+  - Extensions -> Extensions Packages: <install previously downloaded Extension Pack>
